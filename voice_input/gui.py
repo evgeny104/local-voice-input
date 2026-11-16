@@ -159,7 +159,7 @@ class VoiceController(QObject):
         self.status_changed.emit(AppStatus.HOLDING)
 
     def _on_cancel(self) -> None:
-        # отпустили Space раньше 3 с — возврат в ожидание
+        # отпустили Space раньше времени удержания — возврат в ожидание
         self.status_changed.emit(AppStatus.IDLE)
 
     def _on_record_start(self) -> None:
@@ -248,7 +248,9 @@ class VoiceInputWindow(QMainWindow):
         self._tray = QSystemTrayIcon(self.style().standardIcon(
             QStyle.StandardPixmap.SP_MediaVolume
         ), self)
-        self._tray.setToolTip(f"{APP_NAME} — удерживайте Space 3 с")
+        self._tray.setToolTip(
+            f"{APP_NAME} — удерживайте Space {self._config.keys.hold_seconds:g} с"
+        )
 
         menu = QMenu()
         menu.addAction("Показать окно", self.showNormal)
@@ -262,7 +264,7 @@ class VoiceInputWindow(QMainWindow):
             self.hide()
             self._tray.showMessage(
                 APP_NAME,
-                "Голосовой ввод запущен. Удерживайте Space 3 с.\n"
+                f"Голосовой ввод запущен. Удерживайте Space {self._config.keys.hold_seconds:g} с.\n"
                 "Окно — клик по значку, выход — через меню значка.",
                 QSystemTrayIcon.MessageIcon.Information,
                 5_000,

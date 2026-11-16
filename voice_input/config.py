@@ -34,7 +34,7 @@ class AudioConfig:
 class KeyConfig:
     """Параметры триггерной клавиши."""
 
-    hold_seconds: float = 3.0      # удержание Space до старта записи
+    hold_seconds: float = 1      # удержание Space до старта записи
 
 
 @dataclass

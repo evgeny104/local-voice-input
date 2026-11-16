@@ -15,3 +15,7 @@ __pycache__/
 # ===== ОС =====
 Thumbs.db
 desktop.ini
+
+# Зависимости локальные (в каждой копии свои)
+/requirements.txt
+/docs/requirements.txt

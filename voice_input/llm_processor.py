@@ -76,10 +76,37 @@ def _clean_llm_output(result: str) -> str:
     for opening, closing in (("«", "»"), ('"', '"'), ("'", "'")):
         if len(result) > 1 and result[0] == opening and result[-1] == closing:
             result = result[1:-1].strip()
+    # Модель иногда копирует формат примеров целиком: «Вход: ... Выход: текст».
+    # Если «Выход:» встретился не в начале — берём текст после последнего.
+    lower = result.lower()
+    if not lower.startswith("выход:"):
+        idx = lower.rfind("выход:")
+        if idx > 0:
+            result = result[idx + len("выход:"):].strip()
     for label in ("Выход:", "Ответ:", "Результат:", "Итог:", "Итоговый текст:"):
         if result.lower().startswith(label.lower()):
             result = result[len(label):].strip()
     return result
+
+
+# Фрагменты промпта: если они есть в ответе, модель эхом вернула инструкцию
+# вместо результата — такой ответ бракуем и уходим в fallback.
+PROMPT_ECHO_MARKERS = (
+    "Что делать:",
+    "Расставь пунктуацию",
+    "Исправь очевидные ошибки",
+    "слова-паразиты",
+)
+
+
+def _looks_like_prompt_echo(result: str) -> bool:
+    """Похоже ли ответ на эхо системного промпта, а не на исправленный текст.
+
+    Требуем минимум два маркера: одиночное «что делать:» может быть
+    легитимным текстом, продиктованным пользователем.
+    """
+    found = sum(1 for marker in PROMPT_ECHO_MARKERS if marker in result)
+    return found >= 2
 
 
 class LLMProcessor:
@@ -145,6 +172,8 @@ class LLMProcessor:
             result = _clean_llm_output(_extract_answer(message))
             if not result:
                 raise ValueError("LM Studio вернул пустой ответ")
+            if _looks_like_prompt_echo(result):
+                raise ValueError("LM Studio вернула инструкцию вместо текста — эхо промпта")
             logger.info("LLM обработал текст (%d -> %d символов)", len(text), len(result))
             return result
         except (requests.RequestException, ValueError, KeyError, IndexError) as exc:

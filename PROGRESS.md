@@ -7,7 +7,7 @@
 
 ## Задача
 
-Локальное приложение голосового ввода (Voice Typing): удержание Space 3 с → запись с микрофона →
+Локальное приложение голосового ввода (Voice Typing): удержание Space 1,5 с → запись с микрофона →
 Whisper (локально) → обработка текста в LM Studio (OpenAI-compatible API, localhost:1234) →
 текст в буфер обмена. Windows, CPU-only, без облаков.
 Полное ТЗ: `docs/requirements.txt` (этапы 1–7, работа поэтапно, переход после проверки этапа).
@@ -54,7 +54,7 @@ Whisper (локально) → обработка текста в LM Studio (Ope
 - `voice_input/` — пакет приложения, импорты внутри относительные:
   - `config.py` — AppConfig (аудио, клавиша, Whisper, LM Studio), PROJECT_ROOT, setup_logging()
   - `audio_recorder.py` — запись с микрофона в WAV (sounddevice + soundfile)
-  - `keyboard_handler.py` — глобальная Space: таймер 3 с, защита от key repeat, set_busy();
+  - `keyboard_handler.py` — глобальная Space: таймер 1,5 с, защита от key repeat, set_busy();
     опциональные on_press/on_cancel (⚠️ хранятся в `_on_press_cb`/`_on_cancel_cb` —
     имя `_on_press` занято методом, атрибут с таким именем его перекрыл бы — баг этапа 6)
   - `whisper_engine.py` — WhisperEngine: load() один раз, transcribe() → Transcription,
