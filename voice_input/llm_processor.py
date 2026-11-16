@@ -23,17 +23,63 @@ logger = logging.getLogger(__name__)
 DEFAULT_MODEL = "local"
 
 SYSTEM_PROMPT = (
-    "Ты — редактор распознанной речи. Получаешь сырой текст от системы "
-    "распознавания речи без пунктуации. Твоя задача:\n"
-    "- расставить пунктуацию и заглавные буквы;\n"
-    "- исправить очевидные ошибки распознавания слов;\n"
-    "- убрать слова-паразиты («эээ», «ну», «короче» и подобные), только если "
-    "это не меняет смысл;\n"
-    "- сохранить исходный смысл и стиль речи;\n"
-    "- не добавлять никакой информации от себя;\n"
-    "- не превращать разговорную речь в официальный текст.\n"
-    "Верни только итоговый текст без пояснений и кавычек."
+    "Ты редактор распознанной речи. На вход получаешь сырой текст без пунктуации "
+    "от системы распознавания речи. Верни только исправленный текст — без пояснений, "
+    "без кавычек, без слов «выход»/«ответ».\n"
+    "Что делать:\n"
+    "1. Расставь пунктуацию и заглавные буквы.\n"
+    "2. Исправь очевидные ошибки распознавания слов.\n"
+    "3. Удали слова-паразиты (эээ, ну, короче, типа и т.п.), только если смысл не меняется.\n"
+    "4. Сохрани смысл и разговорный стиль, ничего не добавляй от себя.\n"
+    "\n"
+    "Примеры:\n"
+    "Вход: ну эээ привет как дела\n"
+    "Выход: Привет, как дела?\n"
+    "Вход: завтра в десять утра встреча с ивановым обсудить итоги квартала\n"
+    "Выход: Завтра в десять утра встреча с Ивановым, обсудить итоги квартала.\n"
+    "Вход: hello world this is a test\n"
+    "Выход: Hello world, this is a test."
 )
+
+
+def _extract_answer(message: dict) -> str:
+    """Достаёт итоговый текст из ответа модели.
+
+    Обычные модели пишут ответ в content. Reasoning-модели (Qwen3 и т.п.) могут
+    оставить content пустым и положить всё в reasoning_content — тогда ищем
+    финальный ответ: после маркера либо в последнем абзаце рассуждения.
+    """
+    content = (message.get("content") or "").strip()
+    if content:
+        return content
+    reasoning = (message.get("reasoning_content") or "").strip()
+    if not reasoning:
+        return ""
+    for marker in ("**Final Answer:**", "Final Answer:", "Answer:", "Ответ:"):
+        if marker in reasoning:
+            tail = reasoning.split(marker)[-1].strip()
+            if tail:
+                return tail
+    paragraphs = [p.strip() for p in reasoning.split("\n\n") if p.strip()]
+    return paragraphs[-1] if paragraphs else ""
+
+
+def _clean_llm_output(result: str) -> str:
+    """Убирает типичные обёртки ответа: код-блоки, кавычки, служебные слова.
+
+    Маленькие модели часто игнорируют «без пояснений» и возвращают
+    «Выход: ...» в кавычках — зачистим это до чистого текста.
+    """
+    result = result.strip()
+    if result.startswith("```") and result.endswith("```"):
+        result = result.strip("`").strip()
+    for opening, closing in (("«", "»"), ('"', '"'), ("'", "'")):
+        if len(result) > 1 and result[0] == opening and result[-1] == closing:
+            result = result[1:-1].strip()
+    for label in ("Выход:", "Ответ:", "Результат:", "Итог:", "Итоговый текст:"):
+        if result.lower().startswith(label.lower()):
+            result = result[len(label):].strip()
+    return result
 
 
 class LLMProcessor:
@@ -88,13 +134,15 @@ class LLMProcessor:
                     ],
                     "temperature": self._config.temperature,
                     "max_tokens": self._config.max_tokens,
+                    # для Qwen3 и подобных: пытаемся отключить «размышления»;
+                    # шаблоны, которые флаг не знают, просто его игнорируют
+                    "chat_template_kwargs": {"enable_thinking": False},
                 },
                 timeout=self._config.timeout_seconds,
             )
             response.raise_for_status()
-            choices = response.json().get("choices") or []
-            result = (choices[0].get("message") or {}).get("content") or ""
-            result = result.strip()
+            message = (response.json().get("choices") or [{}])[0].get("message") or {}
+            result = _clean_llm_output(_extract_answer(message))
             if not result:
                 raise ValueError("LM Studio вернул пустой ответ")
             logger.info("LLM обработал текст (%d -> %d символов)", len(text), len(result))

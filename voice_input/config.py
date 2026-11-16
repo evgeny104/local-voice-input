@@ -53,7 +53,7 @@ class LLMConfig:
     base_url: str = "http://localhost:1234/v1"
     temperature: float = 0.2       # низкая температура — правим текст, не сочиняем
     max_tokens: int = 2_000
-    timeout_seconds: float = 30.0
+    timeout_seconds: float = 90.0
     check_timeout_seconds: float = 2.0   # таймаут быстрой проверки доступности
 
 
