@@ -1,0 +1,17 @@
+# ===== Local Voice Input =====
+# Временные аудиозаписи (папка создаётся автоматически при первой записи)
+temp/
+*.wav
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+
+# ===== Логи и IDE =====
+*.log
+.idea/
+
+# ===== ОС =====
+Thumbs.db
+desktop.ini

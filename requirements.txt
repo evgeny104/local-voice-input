@@ -1,0 +1,21 @@
+# ===============================================================
+# Локальный голосовой ввод: Whisper (CPU) + LM Studio
+# Порядок установки (терминал PyCharm, venv активирован):
+#
+#   Шаг 1. PyTorch CPU — ОБЯЗАТЕЛЬНО отдельной командой:
+#     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+#
+#   Шаг 2. Остальные зависимости:
+#     pip install -r requirements.txt
+#
+# ПРИМЕЧАНИЕ: torch/torchvision/torchaudio НЕ указаны ниже специально —
+# при обычной установке с PyPI pip скачал бы CUDA-версию (~2.5 ГБ, не нужна).
+# Также требуется ffmpeg (не Python-пакет!) — см. инструкцию.
+# ===============================================================
+
+openai-whisper>=20250625
+sounddevice>=0.5.6
+soundfile>=0.14.0
+pynput>=1.8.2
+PySide6>=6.12.0
+requests>=2.34.0
