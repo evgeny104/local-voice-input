@@ -41,7 +41,7 @@ class KeyConfig:
 class WhisperConfig:
     """Параметры локальной модели Whisper."""
 
-    model_size: str = "small"      # по умолчанию small (CPU, важно качество русской речи)
+    model_size: str = "medium"     # по умолчанию medium (CPU, важно качество русской речи)
     device: str = "cpu"
     fp16: bool = False             # на CPU обязательно False
 

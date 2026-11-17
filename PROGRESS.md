@@ -27,7 +27,7 @@ Whisper (локально) → обработка текста в LM Studio (Ope
 
 ## Принятые решения
 
-- Whisper по умолчанию **small** (важно качество русской речи на CPU)
+- Whisper по умолчанию **medium** (важно качество русской речи на CPU)
 - PyTorch CPU-версия: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
 - Пробелы, печатающиеся в фокусированное окно во время удержания Space — известный компромисс
 - Временные WAV — в папке `temp/` в корне проекта (в .gitignore), НЕ в системном %TEMP%
@@ -45,7 +45,7 @@ Whisper (локально) → обработка текста в LM Studio (Ope
   soundfile 0.14.0, pynput 1.8.2, requests 2.34.2, numpy 2.5.x
 - ffmpeg 9.0.2: whisper_engine сам ищет ffmpeg.exe (`%LOCALAPPDATA%\Programs\ffmpeg\bin` или PATH)
   и добавляет папку в PATH процесса — приложение не зависит от системного PATH
-- Модель whisper small скачивается в `~/.cache/whisper` (~460 МБ) при первом запуске
+- Модель whisper medium скачивается в `~/.cache/whisper` (~1.5 ГБ) при первом запуске
 - Логи приложения: `voice_input.log` (setup_logging из config.py, файл в корне проекта)
 
 ## Структура

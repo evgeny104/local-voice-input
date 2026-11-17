@@ -299,9 +299,12 @@ class VoiceInputWindow(QMainWindow):
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._status_label.setStyleSheet("font-weight: bold; padding: 8px;")
         top_row.addWidget(self._status_label, stretch=1)
-        self._toggle_button = QPushButton("Голосовой ввод: выкл")
+        self._toggle_button = QPushButton("Голосовой ввод: вкл")
         self._toggle_button.setCheckable(True)
-        self._toggle_button.setChecked(True)
+        self._toggle_button.setChecked(True)  # по умолчанию всегда включён
+        # Space управляет записью глобально (KeyboardHandler) — кнопка не должна
+        # реагировать на него как на стандартную клавишу активации Qt
+        self._toggle_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._update_toggle_text(True)
         top_row.addWidget(self._toggle_button)
         root.addLayout(top_row)

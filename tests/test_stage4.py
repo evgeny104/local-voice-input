@@ -4,8 +4,8 @@
     python -m tests.test_stage4
 
 Что происходит:
-    1. При первом запуске скачивается модель Whisper small (~460 МБ) — подождите,
-       прогресс скачивания отображается в терминале.
+    1. При первом запуске скачивается модель Whisper, заданная в конфиге
+       (medium, ~1.5 ГБ) — подождите, прогресс скачивания отображается в терминале.
     2. Зажмите Space 3 с, скажите фразу, отпустите Space.
     3. Распознанный текст появится в консоли; WAV-файл удалится автоматически.
     4. Язык определяется автоматически — попробуйте фразы на русском и английском,
@@ -33,7 +33,7 @@ def main() -> None:
     recorder = AudioRecorder(config.audio)
     engine = WhisperEngine(config.whisper)
 
-    print("Загрузка модели Whisper (small)...", flush=True)
+    print(f"Загрузка модели Whisper ({config.whisper.model_size})...", flush=True)
     engine.load()
     print("Модель загружена.\n", flush=True)
 

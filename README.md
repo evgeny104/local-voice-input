@@ -21,7 +21,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
-Модель Whisper (small, ~460 МБ) скачается при первом запуске автоматически.
+Модель Whisper (medium, ~1.5 ГБ) скачается при первом запуске автоматически.
 
 ## Запуск
 

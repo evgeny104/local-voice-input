@@ -74,7 +74,7 @@ class WhisperEngine:
         """Загружает модель в память.
 
         При первом запуске веса скачиваются автоматически
-        (~460 МБ для small) в кэш пользователя ~/.cache/whisper.
+        (~1.5 ГБ для medium) в кэш пользователя ~/.cache/whisper.
         """
         _ensure_ffmpeg_on_path()
         with self._lock:
